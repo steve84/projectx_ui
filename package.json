@@ -1,0 +1,23 @@
+{
+  "name": "projectx_ui",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "bin": {
+    "brick_eval_ui": "app.js"
+  },
+  "scripts": {
+    "start": "webpack ./src/index.js -o ./bin --watch",
+    "build": "webpack ./src/index.js --output ./bin/app.js -p"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "mithril": "^2.2.2"
+  },
+  "devDependencies": {
+    "webpack": "^5.72.1",
+    "webpack-cli": "^4.9.2"
+  }
+}
