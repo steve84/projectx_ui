@@ -3,10 +3,14 @@ var m = require("mithril")
 var Exchange = require('./models/exchange/Exchange')
 var Pair = require('./models/pair/Pair')
 var Symbol = require('./models/symbol/Symbol')
+var KeyFigure = require('./models/key_figure/KeyFigure')
+var AlarmCondition = require('./models/alarm_condition/AlarmCondition')
+var TaMethod = require('./models/ta_method/TaMethod')
 
 var PriceList = require("./views/price/PriceList")
 var AlarmJobList = require("./views/alarm_job/AlarmJobList")
 var AlarmJobDetail = require("./views/alarm_job/AlarmJobDetail")
+var AlarmJobFigureDetail = require("./views/alarm_job_figure/AlarmJobFigureDetail")
 
 var appState = {
     activeRoute: window.location.hash.split('/').pop()
@@ -15,6 +19,9 @@ var appState = {
 Exchange.getAllExchanges()
 Pair.getAllPairs()
 Symbol.getAllSymbols()
+KeyFigure.getAllKeyFigures()
+AlarmCondition.getAllAlarmConditions()
+TaMethod.getAllTaMethods()
 
 m.render(document.body, [
     m("nav", m("div", {class: "ui menu"}, [
@@ -29,7 +36,8 @@ m.render(document.body, [
             appState.activeRoute = 'alarm_jobs'
         }}, "Alarm Jobs")
     ])),
-    m("main", m("div", {class: "ui container"}))
+    m("main", m("div", {class: "ui container"})),
+    m(AlarmJobFigureDetail)
 ])
 
 
@@ -41,5 +49,6 @@ if (mainContainerTag) {
         "/prices": PriceList,
         "/alarm_jobs": AlarmJobList,
         "/alarm_job/:key": AlarmJobDetail,
+        "/alarm_job_figure": AlarmJobFigureDetail
     })
 }

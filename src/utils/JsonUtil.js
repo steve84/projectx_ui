@@ -1,17 +1,16 @@
 var JsonUtil = {
-    // https://24ways.org/2010/calculating-color-contrast/
     enrichResponse: resp => {
         if (!!resp && resp.included) {
             resp.data.forEach(e => {
                 e.attributes.id = e.id
                 Object.keys(e.relationships).forEach(rel => {
                     if (e.relationships[rel].data instanceof Array) {
-                        e.attributes[rel] = []
+                        e.attributes["_" + rel] = []
                         e.relationships[rel].data.forEach(s => {
                             inc = resp.included.find(i => i.type === s.type && i.id === s.id)
                             if (!!inc) {
                                 inc.attributes.id = inc.id
-                                e.attributes[rel].push(inc.attributes)
+                                e.attributes["_" + rel].push(inc.attributes)
                             }
                         })
                     } else {
@@ -23,7 +22,7 @@ var JsonUtil = {
                                     inc.attributes = {}
                                 }
                                 inc.attributes.id = inc.id
-                                e.attributes[rel] = inc.attributes
+                                e.attributes["_" + rel] = inc.attributes
                             }
                         }
                     }
@@ -32,6 +31,18 @@ var JsonUtil = {
         }
         console.log(resp)
         return resp
+    },
+    removePropertiesFromObject: (obj, prefix, depth, max_depth) =>  {
+        if (depth > max_depth || !obj) {
+            return
+        }
+        Object.keys(obj).forEach(key => {
+            if (key.startsWith(prefix)) {
+                delete obj[key]
+            } else if (typeof obj[key] === 'object') {
+                JsonUtil.removePropertiesFromObject(obj[key], prefix, depth + 1, max_depth)
+            }
+        })
     }
 }
 
