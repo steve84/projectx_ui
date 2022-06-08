@@ -14,7 +14,47 @@ var AlarmJobFigure = {
     orderByDirection: "",
     loading: false,
     queryParams: {},
-    actualAlarmJobFigure: {},
+    actualAlarmJobFigure: {
+        "attributes": {
+          "alarm_condition_arguments": {},
+          "interval": 900,
+          "method_arguments": {}
+        },
+        "id": "",
+        "relationships": {
+          "alarm_condition": {
+            "data": {
+              "id": "",
+              "type": "alarm_conditions"
+            }
+          },
+          "exchange": {
+            "data": {
+              "id": "",
+              "type": "exchanges"
+            }
+          },
+          "key_figure": {
+            "data": {
+              "id": "",
+              "type": "key_figures"
+            }
+          },
+          "pair": {
+            "data": {
+              "id": "",
+              "type": "pairs"
+            }
+          },
+          "ta_method": {
+            "data": {
+              "id": "",
+              "type": "ta_methods"
+            }
+          }
+        },
+        "type": "alarm_job_figures"
+      },
     getAlarmJobFiguresByAlarmId: alarm_job_id => {
         AlarmJobFigure.queryParams["page[number]"] = AlarmJobFigure.page
         AlarmJobFigure.queryParams["page[size]"] = AlarmJobFigure.pageSize
@@ -40,6 +80,29 @@ var AlarmJobFigure = {
             AlarmJobFigure.pageSize = tmpQueryParams["page[size]"]
             AlarmJobFigure.totalPages = Math.trunc(AlarmJobFigure.numResults / AlarmJobFigure.pageSize) + 1
             AlarmJobFigure.loading = false
+        })
+    },
+    setActualAlarmJobFigure: alarm_job_figure => {
+        AlarmJobFigure.actualAlarmJobFigure = alarm_job_figure
+        Object.keys(AlarmJobFigure.actualAlarmJobFigure.relationships).forEach(key => {
+            if (!AlarmJobFigure.actualAlarmJobFigure.relationships[key].data) {
+                AlarmJobFigure.actualAlarmJobFigure.relationships[key].data = {id: "", type: ""}
+                if (key === "alarm_condition") {
+                    AlarmJobFigure.actualAlarmJobFigure.relationships[key].data["type"] = "alarm_conditions"
+                }
+                if (key === "exchange") {
+                    AlarmJobFigure.actualAlarmJobFigure.relationships[key].data["type"] = "exchanges"
+                }
+                if (key === "ta_method") {
+                    AlarmJobFigure.actualAlarmJobFigure.relationships[key].data["type"] = "ta_methods"
+                }
+                if (key === "key_figure") {
+                    AlarmJobFigure.actualAlarmJobFigure.relationships[key].data["type"] = "key_figures"
+                }
+                if (key === "pair") {
+                    AlarmJobFigure.actualAlarmJobFigure.relationships[key].data["type"] = "pairs"
+                }
+            }
         })
     }
 }

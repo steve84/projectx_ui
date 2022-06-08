@@ -36,8 +36,7 @@ m.render(document.body, [
             appState.activeRoute = 'alarm_jobs'
         }}, "Alarm Jobs")
     ])),
-    m("main", m("div", {class: "ui container"})),
-    m(AlarmJobFigureDetail)
+    m("main", m("div", {class: "ui container"}))
 ])
 
 

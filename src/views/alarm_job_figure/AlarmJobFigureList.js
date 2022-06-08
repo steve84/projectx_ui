@@ -4,6 +4,7 @@ var AlarmJobFigure = require("../../models/alarm_job_figure/AlarmJobFigure")
 var KeyFigure = require("../../models/key_figure/KeyFigure")
 
 var Table = require("../common/Table")
+var AlarmJobFigureDetail = require("./AlarmJobFigureDetail")
 
 
 var state = {
@@ -29,6 +30,7 @@ var state = {
         {"name": "Details", "sortable": false, "element": row => m("div", m("button", {
             class: "mini ui secondary button",
             onclick: e => {
+                AlarmJobFigure.setActualAlarmJobFigure(AlarmJobFigure.list.find(fig => fig.id === row.id))
                 $("#alarm_job_figure_detail_modal").modal("show")
             }
         }, "Edit"))},
@@ -45,7 +47,8 @@ var AlarmJobFigureList =  {
             "getNumResults": () => AlarmJobFigure.numResults,
             "getOrderByField": () => AlarmJobFigure.orderByField,
             "getOrderByDirection": () => AlarmJobFigure.orderByDirection,
-        })
+        }),
+        m(AlarmJobFigureDetail, {alarm_job_figure: AlarmJobFigure.actualAlarmJobFigure})
     ]
 }
 
