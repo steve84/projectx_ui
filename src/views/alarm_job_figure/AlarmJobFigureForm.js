@@ -11,69 +11,94 @@ var AlarmJobFigure = require("../../models/alarm_job_figure/AlarmJobFigure")
 
 
 var AlarmJobFigureForm =  {
-    view: () => m("div", {class: "ui form", id: "alarm_job_figure_detail_form"}, [
+    oninit: vnode => {
+        vnode.state.val = vnode.attrs.data
+    },
+    // onupdate: vnode => {
+    //     vnode.state.val = vnode.attrs.data
+    // },
+    view: vnode => m("div", {class: "ui form", id: "alarm_job_figure_detail_form"}, [
         m("div", {class: "field"}, [
             m("label", "Figure"),
-            KeyFigure.list.length > 0 ? m("select", {class: "ui fluid dropdown", value: AlarmJobFigure.actualAlarmJobFigure.relationships.key_figure.data.id}, KeyFigure.list.map(e => m("option", {value: e.id}, e.attributes.figure_name))) : m("span")
+            KeyFigure.list.length > 0 ? m("select", {class: "ui fluid dropdown", value: vnode.state.val.relationships.key_figure.data.id}, KeyFigure.list.map(e => m("option", {value: e.id}, e.attributes.figure_name))) : m("span")
         ]),
         m("div", {class: "field"}, [
             m("label", "Exchange"),
-            m("select", {class: "ui fluid dropdown", value: AlarmJobFigure.actualAlarmJobFigure.relationships.exchange.data.id}, Exchange.list.map(e => m("option", {value: e.id}, e.attributes.exchange_name)))
+            m("select", {class: "ui fluid dropdown", value: vnode.state.val.relationships.exchange.data.id}, Exchange.list.map(e => m("option", {value: e.id}, e.attributes.exchange_name)))
         ]),
         m("div", {class: "field"}, [
             m("label", "Method"),
             m("select", {
                 class: "ui fluid dropdown",
-                value: AlarmJobFigure.actualAlarmJobFigure.relationships.ta_method.data.id,
+                value: vnode.state.val.relationships.ta_method.data.id,
                 onchange: e => {
-                    AlarmJobFigureForm.taMethodSchema = {}
+                    vnode.state.val.relationships.ta_method.data.id = e.target.value
+                    vnode.state.val.attributes.method_arguments = {}
                     method = TaMethod.list.find(m => m.id === e.target.value)
-                    if (!!method && !!method.attributes && !!method.attributes.method_arguments_schema) {
-                        AlarmJobFigureForm.taMethodSchema = method.attributes.method_arguments_schema
+                    if (MiscUtil.hasPropertyPath(method, "attributes.method_arguments_schema.properties")) {
+                        vnode.state.val.attributes._ta_method.method_arguments_schema = method.attributes.method_arguments_schema
+                        Object.keys(method.attributes.method_arguments_schema.properties).forEach(prop => {
+                            property = method.attributes.method_arguments_schema.properties[prop]
+                            vnode.state.val.attributes.method_arguments[prop] = ["number", "integer"].indexOf(property.type) > -1 ? 0 : ""
+                        })
+                    } else {
+                        vnode.state.val.attributes._ta_method.method_arguments_schema = {}
                     }
                 }
             }, TaMethod.list.map(e => m("option", {value: e.id}, e.attributes.method_name)))
         ]),
-        Object.keys(AlarmJobFigureForm.taMethodSchema).length > 0 ? m(
+        MiscUtil.hasPropertyPath(vnode.state.val, "attributes._ta_method.method_arguments_schema.properties", ".") ? m(
             "div",
             {class: "fields"},
-            Object.keys(AlarmJobFigureForm.taMethodSchema.properties).map(prop => {
-                property = AlarmJobFigureForm.taMethodSchema.properties[prop]
+            Object.keys(vnode.state.val.attributes._ta_method.method_arguments_schema.properties).map(prop => {
+                property = vnode.state.val.attributes._ta_method.method_arguments_schema.properties[prop]
                 return m("div", {class: "field"}, [
                     m("label", property.description),
-                    m("input", {type: ["number", "integer"].indexOf(property.type) > -1 ? "number" : "text"})
+                    m("input", {
+                        type: ["number", "integer"].indexOf(property.type) > -1 ? "number" : "text",
+                        value: vnode.state.val.attributes.method_arguments[prop],
+                        name: prop
+                    })
                 ])
             })) : m("span"),
         m("div", {class: "field"}, [
             m("label", "Alarm Condition"),
             m("select", {
                 class: "ui fluid dropdown",
-                value: AlarmJobFigure.actualAlarmJobFigure.relationships.alarm_condition.data.id,
+                value: vnode.state.val.relationships.alarm_condition.data.id,
                 onchange: e => {
-                    AlarmJobFigureForm.alarmConditionSchema = {}
+                    vnode.state.val.relationships.alarm_condition.data.id = e.target.value
+                    vnode.state.val.attributes.alarm_condition_arguments = {}
                     condition = AlarmCondition.list.find(m => m.id === e.target.value)
-                    if (!!condition && !!condition.attributes && !!condition.attributes.condition_input_schema) {
-                        AlarmJobFigureForm.alarmConditionSchema = condition.attributes.condition_input_schema
+                    if (MiscUtil.hasPropertyPath(condition, "attributes.condition_input_schema.properties")) {
+                        vnode.state.val.attributes._alarm_condition.condition_input_schema = condition.attributes.condition_input_schema
+                        Object.keys(condition.attributes.condition_input_schema.properties).forEach(prop => {
+                            property = condition.attributes.condition_input_schema.properties[prop]
+                            vnode.state.val.attributes.method_arguments[prop] = ["number", "integer"].indexOf(property.type) > -1 ? 0 : ""
+                        })
+                    } else {
+                        vnode.state.val.attributes._alarm_condition.condition_input_schema = {}
                     }
                 }
             }, AlarmCondition.list.map(e => m("option", {value: e.id}, e.attributes.condition_name)))
         ]),
-        Object.keys(AlarmJobFigureForm.alarmConditionSchema).length > 0 ? m(
+        MiscUtil.hasPropertyPath(vnode.state.val, "attributes._alarm_condition.condition_input_schema.properties") ? m(
             "div",
             {class: "fields"},
-            Object.keys(AlarmJobFigureForm.alarmConditionSchema.properties).map(prop => {
-                property = AlarmJobFigureForm.alarmConditionSchema.properties[prop]
+            Object.keys(vnode.state.val.attributes._alarm_condition.condition_input_schema.properties).map(prop => {
+                property = vnode.state.val.attributes._alarm_condition.condition_input_schema.properties[prop]
                 return m("div", {class: "field"}, [
                     m("label", property.description),
                     m("input", {
                         type: ["number", "integer"].indexOf(property.type) > -1 ? "number" : "text",
-                        min: Object.keys(property).indexOf('minimum') > -1 ? property.minimum : null
+                        value: vnode.state.val.attributes.alarm_condition_arguments[prop],
+                        min: Object.keys(property).indexOf('minimum') > -1 ? property.minimum : null,
+                        name: prop
                     })
                 ])
             })) : m("span"),
     ]),
-    taMethodSchema: {},
-    alarmConditionSchema: {}
+    val: {}
 }
 
 module.exports = AlarmJobFigureForm

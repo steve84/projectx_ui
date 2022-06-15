@@ -32,6 +32,7 @@ var state = {
             onclick: e => {
                 AlarmJobFigure.setActualAlarmJobFigure(AlarmJobFigure.list.find(fig => fig.id === row.id))
                 $("#alarm_job_figure_detail_modal").modal("show")
+                m.redraw()
             }
         }, "Edit"))},
     ]
@@ -48,7 +49,7 @@ var AlarmJobFigureList =  {
             "getOrderByField": () => AlarmJobFigure.orderByField,
             "getOrderByDirection": () => AlarmJobFigure.orderByDirection,
         }),
-        m(AlarmJobFigureDetail, {alarm_job_figure: AlarmJobFigure.actualAlarmJobFigure})
+        m(AlarmJobFigureDetail)
     ]
 }
 

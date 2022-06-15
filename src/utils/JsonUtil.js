@@ -29,7 +29,6 @@ var JsonUtil = {
                 })
             })
         }
-        console.log(resp)
         return resp
     },
     removePropertiesFromObject: (obj, prefix, depth, max_depth) =>  {
