@@ -1,10 +1,12 @@
 var m = require("mithril")
 
 var JsonUtil = require("../../utils/JsonUtil")
+var MiscUtil = require("../../utils/MiscUtil")
 
 var baseUrl = "http://localhost:5000/api/"
 
 var AlarmJobFigure = {
+    attributes: ['alarm_condition_arguments', 'interval', 'method_arguments', 'alarm_job_id'],
     list: [],
     numResults: 0,
     totalPages: 0,
@@ -14,47 +16,7 @@ var AlarmJobFigure = {
     orderByDirection: "",
     loading: false,
     queryParams: {},
-    actualAlarmJobFigure: {
-        "attributes": {
-          "alarm_condition_arguments": {},
-          "interval": 900,
-          "method_arguments": {}
-        },
-        "id": "",
-        "relationships": {
-          "alarm_condition": {
-            "data": {
-              "id": "",
-              "type": "alarm_conditions"
-            }
-          },
-          "exchange": {
-            "data": {
-              "id": "",
-              "type": "exchanges"
-            }
-          },
-          "key_figure": {
-            "data": {
-              "id": "",
-              "type": "key_figures"
-            }
-          },
-          "pair": {
-            "data": {
-              "id": "",
-              "type": "pairs"
-            }
-          },
-          "ta_method": {
-            "data": {
-              "id": "",
-              "type": "ta_methods"
-            }
-          }
-        },
-        "type": "alarm_job_figures"
-      },
+    actualAlarmJobFigure: {}, 
     getAlarmJobFiguresByAlarmId: alarm_job_id => {
         AlarmJobFigure.queryParams["page[number]"] = AlarmJobFigure.page
         AlarmJobFigure.queryParams["page[size]"] = AlarmJobFigure.pageSize
@@ -82,6 +44,36 @@ var AlarmJobFigure = {
             AlarmJobFigure.loading = false
         })
     },
+    createOrUpdateFigure: figure => {
+      copiedFigure = MiscUtil.deepCopy(figure)
+      JsonUtil.keepPropertiesOnObject(copiedFigure.attributes, AlarmJobFigure.attributes)
+      JsonUtil.removeInvalidRelationships(copiedFigure.relationships)
+      if (!copiedFigure.id) {
+        delete copiedFigure.id
+      }
+      return m.request({
+        method: !!figure.id ? "PATCH" : "POST",
+        url: baseUrl + "alarm_job_figures" + (!!figure.id ? "/" + figure.id : ""),
+        headers: {
+          "Accept": "application/vnd.api+json",
+          "Content-Type": "application/vnd.api+json"
+        },
+        body: {"data": copiedFigure}
+      }).then(res => {
+          console.log(res)
+      })
+    },
+    deleteFigure: id => {
+      return m.request({
+        method: "DELETE",
+        url: baseUrl + "alarm_job_figures/" + id,
+        headers: {
+          "Accept": "application/vnd.api+json",
+        }
+      }).then(res => {
+          console.log(res)
+      })
+    },
     setActualAlarmJobFigure: alarm_job_figure => {
         AlarmJobFigure.actualAlarmJobFigure = alarm_job_figure
         Object.keys(AlarmJobFigure.actualAlarmJobFigure.relationships).forEach(key => {
@@ -104,6 +96,52 @@ var AlarmJobFigure = {
                 }
             }
         })
+    },
+    setDefaultAlarmJobFigure: () => {
+        AlarmJobFigure.actualAlarmJobFigure = {
+          "attributes": {
+            "alarm_condition_arguments": {},
+            "interval": 900,
+            "method_arguments": {},
+            "alarm_job_id": null,
+            "_alarm_condition": {},
+            "_ta_method": {},
+          },
+          "id": "",
+          "relationships": {
+            "alarm_condition": {
+              "data": {
+                "id": "",
+                "type": "alarm_conditions"
+              }
+            },
+            "exchange": {
+              "data": {
+                "id": "",
+                "type": "exchanges"
+              }
+            },
+            "key_figure": {
+              "data": {
+                "id": "",
+                "type": "key_figures"
+              }
+            },
+            "pair": {
+              "data": {
+                "id": "",
+                "type": "pairs"
+              }
+            },
+            "ta_method": {
+              "data": {
+                "id": "",
+                "type": "ta_methods"
+              }
+            }
+          },
+          "type": "alarm_job_figures"
+        }
     }
 }
 

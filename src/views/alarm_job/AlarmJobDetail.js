@@ -31,7 +31,16 @@ var AlarmJobDetail =  {
         AlarmJobFigure.getAlarmJobFiguresByAlarmId(vnode.attrs.key)},
     view: (vnode) => m("div", {class: "ui grid"}, [
         m("div", {class: "sixteen wide column"}, m("div", {class: "ui card", style: "width: 100%; margin-top: 15px"}, m("div", {class: "ui definition table"}, m(PropertyList, {"cols": vnode.state.cols, "data": AlarmJob.actualAlarmJob})))),
-        m("div", {class: "sixteen wide column"}, AlarmJobFigure.list && AlarmJobFigure.list.length > 0 ? m(AlarmJobFigureList) : m("div")),
+        m("div", {class: "sixteen wide column"}, AlarmJobFigure.list && AlarmJobFigure.list.length > 0 ? [
+            m("button", {
+                class: "mini ui primary button",
+                onclick: e => {
+                    AlarmJobFigure.setDefaultAlarmJobFigure()
+                    $("#alarm_job_figure_detail_modal").modal("show")
+                }
+            }, "Add new figure"),
+            m(AlarmJobFigureList, {alarm_job_id: vnode.attrs.key})
+        ] : m("div")),
         m(m.route.Link, {selector: "button", class: "mini ui primary button", href: vnode.state.backlink}, "Zurück")
     ])
 }

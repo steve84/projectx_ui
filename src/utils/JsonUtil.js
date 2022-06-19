@@ -1,7 +1,12 @@
+var MiscUtil = require("./MiscUtil")
+
 var JsonUtil = {
     enrichResponse: resp => {
         if (!!resp && resp.included) {
             resp.data.forEach(e => {
+                if (!MiscUtil.hasPropertyPath(e, "attributes")) {
+                    e.attributes = {}
+                }
                 e.attributes.id = e.id
                 Object.keys(e.relationships).forEach(rel => {
                     if (e.relationships[rel].data instanceof Array) {
@@ -42,6 +47,28 @@ var JsonUtil = {
                 JsonUtil.removePropertiesFromObject(obj[key], prefix, depth + 1, max_depth)
             }
         })
+    },
+    keepPropertiesOnObject: (obj, arrayOfProperties) => {
+        if (!obj || !arrayOfProperties || arrayOfProperties.length === 0) {
+            return
+        }
+        Object.keys(obj).forEach(key => {
+            if (arrayOfProperties.indexOf(key) === -1) {
+                delete obj[key]
+            }
+        })
+    },
+    removeInvalidRelationships: obj => {
+        if (!obj) {
+            return
+        }
+        Object.keys(obj).forEach(key => {
+            rel = obj[key]
+            if (!MiscUtil.hasPropertyPath(rel, "data.id") || !rel.data.id) {
+                delete obj[key]
+            }
+        })
+        console.log("Done")
     }
 }
 

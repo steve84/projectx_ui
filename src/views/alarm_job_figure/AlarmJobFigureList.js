@@ -27,19 +27,29 @@ var state = {
                 m("td", row.alarm_condition_arguments[arg])
             ])))) : m("span")
         }},
-        {"name": "Details", "sortable": false, "element": row => m("div", m("button", {
-            class: "mini ui secondary button",
-            onclick: e => {
-                AlarmJobFigure.setActualAlarmJobFigure(AlarmJobFigure.list.find(fig => fig.id === row.id))
-                $("#alarm_job_figure_detail_modal").modal("show")
-                m.redraw()
-            }
-        }, "Edit"))},
+        {"name": "Details", "sortable": false, "element": row => m("div", [
+            m("button", {
+                class: "mini ui secondary button",
+                onclick: e => {
+                    AlarmJobFigure.setActualAlarmJobFigure(AlarmJobFigure.list.find(fig => fig.id === row.id))
+                    $("#alarm_job_figure_detail_modal").modal("show")
+                }
+            }, "Edit"),
+            m("button", {
+                class: "mini ui secondary button",
+                onclick: e => {
+                    AlarmJobFigure.deleteFigure(row.id)
+                }
+            }, "Delete")
+        ])},
     ]
 }
 
 var AlarmJobFigureList =  {
-    view: () => [
+    oninit: vnode => {
+        vnode.state.alarm_job_id = vnode.attrs.alarm_job_id
+    },
+    view: vnode => [
         m(Table, {
             "pageable": false,
             "isLoading": () => AlarmJobFigure.loading,
@@ -47,9 +57,9 @@ var AlarmJobFigureList =  {
             "cols": state.cols,
             "getNumResults": () => AlarmJobFigure.numResults,
             "getOrderByField": () => AlarmJobFigure.orderByField,
-            "getOrderByDirection": () => AlarmJobFigure.orderByDirection,
+            "getOrderByDirection": () => AlarmJobFigure.orderByDirection
         }),
-        m(AlarmJobFigureDetail)
+        m(AlarmJobFigureDetail, {data: AlarmJobFigure.actualAlarmJobFigure, alarm_job_id: vnode.state.alarm_job_id, saveFn: AlarmJobFigure.createOrUpdateFigure})
     ]
 }
 
