@@ -44,6 +44,18 @@ var AlarmJobFigure = {
             AlarmJobFigure.loading = false
         })
     },
+    getAlarmJobFigureById: id => {
+      return m.request({
+        method: "GET",
+        url: baseUrl + "alarm_job_figures/" + id,
+        params: {
+          "include": "pair,exchange,key_figure,ta_method,alarm_condition"
+        },
+        headers: {
+          "Accept": "application/vnd.api+json",
+        }
+      })
+    },
     createOrUpdateFigure: figure => {
       copiedFigure = MiscUtil.deepCopy(figure)
       JsonUtil.keepPropertiesOnObject(copiedFigure.attributes, AlarmJobFigure.attributes)
@@ -54,13 +66,26 @@ var AlarmJobFigure = {
       return m.request({
         method: !!figure.id ? "PATCH" : "POST",
         url: baseUrl + "alarm_job_figures" + (!!figure.id ? "/" + figure.id : ""),
+        params: {
+          "include": "pair,exchange,key_figure,ta_method,alarm_condition"
+        },
         headers: {
           "Accept": "application/vnd.api+json",
           "Content-Type": "application/vnd.api+json"
         },
         body: {"data": copiedFigure}
       }).then(res => {
-          console.log(res)
+        if (MiscUtil.hasPropertyPath(res, "data.attributes")) {
+          var res_enriched = JsonUtil.enrichResponse(res)
+          AlarmJobFigure.list.push(res_enriched.data)
+          AlarmJobFigure.numResults += 1
+        } else {
+          AlarmJobFigure.getAlarmJobFigureById(figure.id).then(res_figure => {
+            var figure_enriched = JsonUtil.enrichResponse(res_figure)
+            var index = AlarmJobFigure.list.findIndex(e => e.id === figure_enriched.data.id)
+            AlarmJobFigure.list[index] = figure_enriched.data
+          })
+        }
       })
     },
     deleteFigure: id => {
@@ -70,8 +95,10 @@ var AlarmJobFigure = {
         headers: {
           "Accept": "application/vnd.api+json",
         }
-      }).then(res => {
-          console.log(res)
+      }).then(() => {
+        var pre_num_entries = AlarmJobFigure.list.length
+        AlarmJobFigure.list = AlarmJobFigure.list.filter(e => e.id !== id)
+        AlarmJobFigure.numResults -= (pre_num_entries - AlarmJobFigure.list.length)
       })
     },
     setActualAlarmJobFigure: alarm_job_figure => {

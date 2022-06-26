@@ -1,7 +1,9 @@
 var m = require("mithril")
 
+var MiscUtil = require("../../utils/MiscUtil")
+
 var AlarmJobFigure = require("../../models/alarm_job_figure/AlarmJobFigure")
-var KeyFigure = require("../../models/key_figure/KeyFigure")
+var Pair = require("../../models/pair/Pair")
 
 var Table = require("../common/Table")
 var AlarmJobFigureDetail = require("./AlarmJobFigureDetail")
@@ -10,12 +12,12 @@ var AlarmJobFigureDetail = require("./AlarmJobFigureDetail")
 var state = {
     cols: [
         {"name": "Interval", "property": "interval", "sortable": false},
+        {"name": "Pair", "property": "pair", "sortable": false, "fn": row => MiscUtil.hasPropertyPath(row, "_pair.id") ? Pair.getPairStringById(row._pair.id) : ""},
         {"name": "Figure", "property": "key_figure.figure_name", "sortable": false, "fn": row => !!row._key_figure ? row._key_figure.figure_name : ""},
         {"name": "Exchange", "property": "exchange.exchange_name", "sortable": false, "fn": row => !!row._exchange ? row._exchange.exchange_name : ""},
-        /*{"name": "Pair", "property": "pair"},*/
         {"name": "Method", "property": "ta_method.method_name", "sortable": false, "fn": row => !!row._ta_method ? row._ta_method.method_name : ""},
         {"name": "Method arguments", "property": "method_arguments", "sortable": false, "fn": row => {
-            return !!row.method_arguments ? m("div", {class: "ui definition table"}, m("tbody", Object.keys(row.method_arguments).map(arg => m("tr", [
+            return MiscUtil.hasPropertyPath(row, "method_arguments") && Object.keys(row.method_arguments).length > 0 ? m("div", {class: "ui definition table"}, m("tbody", Object.keys(row.method_arguments).map(arg => m("tr", [
                 m("td", {class: "two wide column"},  arg), 
                 m("td", row.method_arguments[arg])
             ])))) : m("span")

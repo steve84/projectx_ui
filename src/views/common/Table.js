@@ -71,7 +71,7 @@ var PagingElement = {
                 vnode.attrs.state.setPage(vnode.attrs.state.getPage() - 1)
                 vnode.attrs.state.fn()
             }}, m("i", {class: "angle left icon"})),
-            m("a", {class: "item"}, vnode.attrs.state.getPage() + " von " + vnode.attrs.state.getTotalPages()),
+            m("a", {class: "item"}, vnode.attrs.state.getPage() + " of " + vnode.attrs.state.getTotalPages()),
             m("a", {class: "icon " + (vnode.attrs.state.getPage() === vnode.attrs.state.getTotalPages() ? "disabled" : "")  + " item", onclick: () => {
                 vnode.attrs.state.setPage(vnode.attrs.state.getPage() + 1)
                 vnode.attrs.state.fn()
@@ -127,7 +127,7 @@ var Table = {
     renderBody: (vnode) => m("tbody", vnode.state.getList().map(row => m("tr", vnode.state.rowStyle ? vnode.state.rowStyle(row.attributes) : {}, vnode.state.cols.map(col => m(CellContent, {"col": col, "row": row.attributes}))))),
     renderFooter: (vnode) => m("tfoot", {class: "full-width"}, m("tr", m("th", {"colspan": vnode.state.cols.length}, [
         vnode.state.pageable ? m(PagingElement, {"state": vnode.state}) :  null,
-        m("div", {class: "left floated"}, "Anzahl Einträge: " + vnode.state.getNumResults())
+        m("div", {class: "left floated"}, "Number of entries: " + vnode.state.getNumResults())
     ]))),
     view: (vnode) => [
         m("div", {class: "ui segment", style: "border: none; box-shadow: none; padding: unset"}, [

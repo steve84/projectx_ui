@@ -7,6 +7,7 @@ var Pair = require("../../models/pair/Pair")
 var KeyFigure = require("../../models/key_figure/KeyFigure")
 var TaMethod = require("../../models/ta_method/TaMethod")
 var AlarmCondition = require("../../models/alarm_condition/AlarmCondition")
+var AlarmJobFigure = require("../../models/alarm_job_figure/AlarmJobFigure")
 
 
 
@@ -14,6 +15,7 @@ var AlarmJobFigureForm =  {
     oninit: vnode => {
         vnode.state.val = vnode.attrs.data
     },
+    onupdate: vnode => AlarmJobFigure.setActualAlarmJobFigure(vnode.state.val),
     view: vnode => m("div", {class: "ui form", id: "alarm_job_figure_detail_form"}, [
         m("div", {class: "field"}, [
             m("label", "Figure"),
@@ -30,6 +32,16 @@ var AlarmJobFigureForm =  {
                 value: vnode.state.val.relationships.exchange.data.id,
                 onchange: e => vnode.state.val.relationships.exchange.data.id = e.target.value
             }, Exchange.list.map(e => m("option", {value: e.id}, e.attributes.exchange_name)))
+        ]),
+        m("div", {class: "field"}, [
+            m("label", "Interval"),
+            m("input", {
+                type: "number",
+                value: vnode.state.val.attributes.interval,
+                min: 0,
+                name: "interval",
+                onchange: e => vnode.state.val.attributes.interval = +e.target.value
+            })
         ]),
         m("div", {class: "field"}, [
             m("label", "Pair"),

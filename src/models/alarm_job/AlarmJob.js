@@ -1,10 +1,12 @@
 var m = require("mithril")
 
 var JsonUtil = require("../../utils/JsonUtil")
+var MiscUtil = require("../../utils/MiscUtil")
 
 var baseUrl = "http://localhost:5000/api/"
 
 var AlarmJob = {
+    attributes: ['is_active', 'job_name', 'job_remark', 'key_figure_ts', 'last_check'],
     list: [],
     numResults: 0,
     totalPages: 0,
@@ -53,9 +55,46 @@ var AlarmJob = {
                 method: "GET",
                 url: baseUrl + "alarm_jobs/" + id,
                 headers: {"Accept": "application/vnd.api+json"}
-            }).then(res => AlarmJob.actualAlarmJob = res.data.attributes)
+            }).then(res => AlarmJob.actualAlarmJob = res.data)
         }
-    }
+    },
+    createOrUpdateJob: job => {
+        copiedJob = MiscUtil.deepCopy(job)
+        JsonUtil.keepPropertiesOnObject(copiedJob.attributes, AlarmJob.attributes)
+        JsonUtil.removeInvalidRelationships(copiedJob.relationships)
+        if (!copiedJob.id) {
+          delete copiedJob.id
+        }
+        return m.request({
+          method: !!job.id ? "PATCH" : "POST",
+          url: baseUrl + "alarm_jobs" + (!!job.id ? "/" + job.id : ""),
+          headers: {
+            "Accept": "application/vnd.api+json",
+            "Content-Type": "application/vnd.api+json"
+          },
+          body: {"data": copiedJob}
+        }).then(res => {
+          if (MiscUtil.hasPropertyPath(res, "data.attributes")) {
+            AlarmJob.list.push(res.data)
+            AlarmJob.numResults += 1
+          } else {
+            AlarmJob.getAlarmJobById(job.id)
+          }
+        })
+      },
+      deleteJob: id => {
+        return m.request({
+          method: "DELETE",
+          url: baseUrl + "alarm_jobs/" + id,
+          headers: {
+            "Accept": "application/vnd.api+json",
+          }
+        }).then(() => {
+          var pre_num_entries = AlarmJob.list.length
+          AlarmJob.list = AlarmJob.list.filter(e => e.id !== id)
+          AlarmJob.numResults -= (pre_num_entries - AlarmJobFigure.list.length)
+        })
+      }
 }
 
 module.exports = AlarmJob

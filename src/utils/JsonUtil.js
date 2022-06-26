@@ -3,6 +3,10 @@ var MiscUtil = require("./MiscUtil")
 var JsonUtil = {
     enrichResponse: resp => {
         if (!!resp && resp.included) {
+            is_array =  resp.data instanceof Array
+            if (!is_array) {
+                resp.data = [resp.data]
+            }
             resp.data.forEach(e => {
                 if (!MiscUtil.hasPropertyPath(e, "attributes")) {
                     e.attributes = {}
@@ -33,6 +37,9 @@ var JsonUtil = {
                     }
                 })
             })
+            if (!is_array) {
+                resp.data = resp.data[0]
+            }
         }
         return resp
     },
@@ -68,7 +75,6 @@ var JsonUtil = {
                 delete obj[key]
             }
         })
-        console.log("Done")
     }
 }
 

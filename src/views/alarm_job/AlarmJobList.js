@@ -26,21 +26,30 @@ var state = {
 var AlarmJobList =  {
     oninit: AlarmJob.getAllAlarms,
     view: () => [
-        m(Table, {
-            "pageable": true,
-            "isLoading": () => AlarmJob.loading,
-            "getList": () => AlarmJob.list,
-            "cols": state.cols,
-            "fn": AlarmJob.getAllAlarmJobs,
-            "getNumResults": () => AlarmJob.numResults,
-            "setPage": page => AlarmJob.page = page,
-            "getPage": () => AlarmJob.page,
-            "getTotalPages": () => AlarmJob.totalPages,
-            "getOrderByField": () => AlarmJob.orderByField,
-            "setOrderByField": field => AlarmJob.orderByField = field,
-            "getOrderByDirection": () => AlarmJob.orderByDirection,
-            "setOrderByDirection": direction => AlarmJob.orderByDirection = direction
-        })
+        m("div", {class: "ui grid"}, [
+            m("div", {class: "sixteen wide column", style: "margin-top: 15px; padding-bottom: 0px"}, [
+                m("button", {
+                    class: "mini ui primary button",
+                }, "Add job")
+            ]),
+            m("div", {class: "sixteen wide column"}, [
+                m(Table, {
+                    "pageable": true,
+                    "isLoading": () => AlarmJob.loading,
+                    "getList": () => AlarmJob.list,
+                    "cols": state.cols,
+                    "fn": AlarmJob.getAllAlarmJobs,
+                    "getNumResults": () => AlarmJob.numResults,
+                    "setPage": page => AlarmJob.page = page,
+                    "getPage": () => AlarmJob.page,
+                    "getTotalPages": () => AlarmJob.totalPages,
+                    "getOrderByField": () => AlarmJob.orderByField,
+                    "setOrderByField": field => AlarmJob.orderByField = field,
+                    "getOrderByDirection": () => AlarmJob.orderByDirection,
+                    "setOrderByDirection": direction => AlarmJob.orderByDirection = direction
+                })
+            ])
+        ])
     ]
 }
 
