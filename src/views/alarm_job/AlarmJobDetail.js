@@ -4,7 +4,9 @@ var MiscUtil = require("../../utils/MiscUtil")
 
 var AlarmJob = require("../../models/alarm_job/AlarmJob")
 var AlarmJobFigure = require("../../models/alarm_job_figure/AlarmJobFigure")
+var AlarmJobLog = require("../../models/alarm_job_log/AlarmJobLog")
 
+var Table = require("../../views/common/Table")
 var AlarmJobFigureList = require("../../views/alarm_job_figure/AlarmJobFigureList")
 
 
@@ -17,6 +19,25 @@ var PropertyList = {
             ])))
         }
     }
+}
+
+var LogTable = {
+    view: vnode => m(Table, {
+        "pageable": true,
+        "sortable": false,
+        "isLoading": () => AlarmJobLog.loading,
+        "getList": () => AlarmJobLog.list,
+        "cols": vnode.attrs.log_cols,
+        "fn": AlarmJobLog.getLogsById,
+        "getNumResults": () => AlarmJobLog.numResults,
+        "setPage": page => AlarmJobLog.page = page,
+        "getPage": () => AlarmJobLog.page,
+        "getTotalPages": () => AlarmJobLog.totalPages,
+        "getOrderByField": () => AlarmJobLog.orderByField,
+        "setOrderByField": field => AlarmJobLog.orderByField = field,
+        "getOrderByDirection": () => AlarmJobLog.orderByDirection,
+        "setOrderByDirection": direction => AlarmJobLog.orderByDirection = direction
+    }),
 }
 
 var PropertyEdit = {
@@ -83,7 +104,9 @@ var AlarmJobDetail =  {
             {"name": "Newest figure ts", "property": "key_figure_ts", "fn": row => row["last_check"] ? new Date(row["last_check"]).toLocaleString() : ""},
         ]
         AlarmJob.getAlarmJobById(vnode.attrs.key)
-        AlarmJobFigure.getAlarmJobFiguresByAlarmId(vnode.attrs.key)},
+        AlarmJobFigure.getAlarmJobFiguresByAlarmId(vnode.attrs.key)
+        AlarmJobLog.getLogsById(vnode.attrs.key)
+    },
     view: (vnode) => m("div", {class: "ui grid"}, [
         m("div", {class: "sixteen wide column"}, m("div", {class: "ui card", style: "width: 100%; margin-top: 15px"}, [
             m("div", {class: "ui definition table"}, m(PropertyList, {"cols": vnode.state.cols, "data": AlarmJob.actualAlarmJob.attributes})),
@@ -109,7 +132,14 @@ var AlarmJobDetail =  {
                 }
             }, "Add new figure"),
             m(AlarmJobFigureList, {alarm_job_id: vnode.attrs.key}),
-            m(PropertyEdit, {alarm_job: AlarmJob.actualAlarmJob})
+            m(PropertyEdit, {alarm_job: AlarmJob.actualAlarmJob}),
+            m(LogTable, {
+                log_cols: [
+                    {"name": "Id", "property": "id", sortable: false},
+                    {"name": "Creation timestamp", "property": "create_ts", sortable: false, "fn": row => row["create_ts"] ? new Date(row["create_ts"]).toLocaleString() : ""},
+                    {"name": "Chart", "property": "chart", sortable: false, "fn": row => m("img", {class: "ui fluid image", src: "data:" + row["datatype"] + ";base64, " + row["chart"]})}
+                ]
+            })
         ] : m("div")),
         m(m.route.Link, {selector: "button", class: "mini ui primary button", href: vnode.state.backlink}, "Back")
     ])

@@ -17,7 +17,7 @@ var state = {
         {"name": "Exchange", "property": "exchange.exchange_name", "sortable": false, "fn": row => !!row._exchange ? row._exchange.exchange_name : ""},
         {"name": "Method", "property": "ta_method.method_name", "sortable": false, "fn": row => !!row._ta_method ? row._ta_method.method_name : ""},
         {"name": "Method arguments", "property": "method_arguments", "sortable": false, "fn": row => {
-            return MiscUtil.hasPropertyPath(row, "method_arguments") && Object.keys(row.method_arguments).length > 0 ? m("div", {class: "ui definition table"}, m("tbody", Object.keys(row.method_arguments).map(arg => m("tr", [
+            return MiscUtil.hasPropertyPath(row, "method_arguments") && !!row.method_arguments && Object.keys(row.method_arguments).length > 0 ? m("div", {class: "ui definition table"}, m("tbody", Object.keys(row.method_arguments).map(arg => m("tr", [
                 m("td", {class: "two wide column"},  arg), 
                 m("td", row.method_arguments[arg])
             ])))) : m("span")
