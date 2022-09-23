@@ -4,6 +4,8 @@ var AlarmJob = require("../../models/alarm_job/AlarmJob")
 
 var Table = require("../common/Table")
 
+var AlarmJobForm = require("./AlarmJobForm")
+
 
 var state = {
     cols: [
@@ -30,8 +32,10 @@ var AlarmJobList =  {
             m("div", {class: "sixteen wide column", style: "margin-top: 15px; padding-bottom: 0px"}, [
                 m("button", {
                     class: "mini ui primary button",
+                    onclick: e => $("#alarm_job_new_modal").modal("show")
                 }, "Add job")
             ]),
+            m(AlarmJobForm, {modal_id: "alarm_job_new_modal"}),
             m("div", {class: "sixteen wide column"}, [
                 m(Table, {
                     "pageable": true,

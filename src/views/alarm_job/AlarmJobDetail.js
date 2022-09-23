@@ -6,16 +6,21 @@ var AlarmJob = require("../../models/alarm_job/AlarmJob")
 var AlarmJobFigure = require("../../models/alarm_job_figure/AlarmJobFigure")
 var AlarmJobLog = require("../../models/alarm_job_log/AlarmJobLog")
 
-var Table = require("../../views/common/Table")
+var AlarmJobForm = require("./AlarmJobForm")
 var AlarmJobFigureList = require("../../views/alarm_job_figure/AlarmJobFigureList")
 
+var Table = require("../../views/common/Table")
 
 var PropertyList = {
-    view: function(vnode) {
-        if (vnode.attrs.data) {
-            return m("tbody", vnode.attrs.cols.map(col => m("tr", [
+    oninit: vnode => {
+        vnode.state.cols = vnode.attrs.cols
+        vnode.state.data = vnode.attrs.data
+    },
+    view: vnode => {
+        if (MiscUtil.hasPropertyPath(vnode, "state.data.is_active")) {
+            return m("tbody", vnode.state.cols.map(col => m("tr", [
                 m("td", {class: "two wide column"},  col.name), 
-                m("td", col.fn ? col.fn(vnode.attrs.data) : col.property.split('.').reduce((o, k) => o.hasOwnProperty(k) ? o[k] : "", vnode.attrs.data))
+                m("td", col.fn ? col.fn(vnode.state.data) : col.property.split('.').reduce((o, k) => o.hasOwnProperty(k) ? o[k] : "", vnode.state.data))
             ])))
         }
     }
@@ -40,59 +45,6 @@ var LogTable = {
     }),
 }
 
-var PropertyEdit = {
-    oninit: vnode => {
-        vnode.state.alarm_job = MiscUtil.deepCopy(vnode.attrs.alarm_job)
-    },
-    oncreate: vnode =>  $("div[name='is_active']").checkbox(vnode.state.alarm_job.attributes.is_active ? "check" : "uncheck"),
-    view: vnode => m("div", {class: "ui modal", id: "alarm_job_detail_modal"}, [
-            m("div", {class: "header"}, "Alarm detail"),
-            m("div", {class: "content"},  MiscUtil.hasPropertyPath(vnode.state, "alarm_job.attributes.is_active") ? m("div", {class: "ui form", id: "alarm_job_detail_form"}, [
-                m("div", {class: "field"}, [
-                    m("label", "Is Active"),
-                    m("div", {
-                        class: "ui checkbox",
-                        name: "is_active"
-                    }, [
-                        m("input", {
-                            class: "hidden",
-                            type: "checkbox"
-                        }),
-                        m("label", "")
-                    ])
-                ]),
-                m("div", {class: "field"}, [
-                    m("label", "Name"),
-                    m("input", {
-                        type: "text",
-                        value: vnode.state.alarm_job.attributes.job_name,
-                        name: "job_name",
-                        onchange: e => vnode.state.alarm_job.attributes.job_name = e.target.value
-                    })
-                ]),
-                m("div", {class: "field"}, [
-                    m("label", "Remarks"),
-                    m("input", {
-                        type: "text",
-                        value: vnode.state.alarm_job.attributes.job_remark,
-                        name: "job_remark",
-                        onchange: e => vnode.state.alarm_job.attributes.job_remark = e.target.value
-                    })
-                ])
-            ]): m("span")),
-            m("div", {class: "actions"}, [
-                m("div", {
-                    class: "ui primary approve button",
-                    onclick: () => {
-                        vnode.state.alarm_job.attributes.is_active = $("div[name='is_active']").checkbox("is checked")
-                        AlarmJob.createOrUpdateJob(vnode.state.alarm_job)
-                    }
-                }, "Save"),
-                m("div", {class: "ui cancel button"}, "Cancel")
-            ])
-        ])
-}
-
 var AlarmJobDetail =  {
     oninit: (vnode) => {
         vnode.state.backlink = vnode.attrs.backlink
@@ -109,7 +61,7 @@ var AlarmJobDetail =  {
     },
     view: (vnode) => m("div", {class: "ui grid"}, [
         m("div", {class: "sixteen wide column"}, m("div", {class: "ui card", style: "width: 100%; margin-top: 15px"}, [
-            m("div", {class: "ui definition table"}, m(PropertyList, {"cols": vnode.state.cols, "data": AlarmJob.actualAlarmJob.attributes})),
+            m("div", {class: "ui definition table"},  MiscUtil.hasPropertyPath(AlarmJob, "actualAlarmJob.attributes") ? m(PropertyList, {"cols": vnode.state.cols, "data": AlarmJob.actualAlarmJob.attributes}) : null),
             m("div", {}, [
                 m("button", {
                     class: "mini ui secondary button",
@@ -119,11 +71,16 @@ var AlarmJobDetail =  {
                 }, "Edit"),
                 m("button", {
                     class: "mini ui secondary button",
-                    onclick: e => AlarmJob.deleteJob(vnode.attrs.key)
+                    onclick: e => AlarmJob.deleteJob(vnode.attrs.key).then(() => {
+                        var pre_num_entries = AlarmJob.list.length
+                        AlarmJob.list = AlarmJob.list.filter(e => e.id !== vnode.attrs.key)
+                        AlarmJob.numResults -= (pre_num_entries - AlarmJobFigure.list.length)
+                        m.route.set("/alarm_jobs")
+                      })
                 }, "Delete")
             ])
         ])),
-        m("div", {class: "sixteen wide column"}, AlarmJobFigure.list && AlarmJobFigure.list.length > 0 ? [
+        m("div", {class: "sixteen wide column"},[
             m("button", {
                 class: "mini ui primary button",
                 onclick: e => {
@@ -132,7 +89,7 @@ var AlarmJobDetail =  {
                 }
             }, "Add new figure"),
             m(AlarmJobFigureList, {alarm_job_id: vnode.attrs.key}),
-            m(PropertyEdit, {alarm_job: AlarmJob.actualAlarmJob}),
+            MiscUtil.hasPropertyPath(AlarmJob, "actualAlarmJob.attributes.is_active") ? m(AlarmJobForm, {alarm_job: AlarmJob.actualAlarmJob, modal_id: "alarm_job_detail_modal"}) : null,
             m(LogTable, {
                 log_cols: [
                     {"name": "Id", "property": "id", sortable: false},
@@ -140,7 +97,7 @@ var AlarmJobDetail =  {
                     {"name": "Chart", "property": "chart", sortable: false, "fn": row => m("img", {class: "ui fluid image", src: "data:" + row["datatype"] + ";base64, " + row["chart"]})}
                 ]
             })
-        ] : m("div")),
+        ]),
         m(m.route.Link, {selector: "button", class: "mini ui primary button", href: vnode.state.backlink}, "Back")
     ])
 }

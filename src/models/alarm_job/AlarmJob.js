@@ -3,6 +3,8 @@ var m = require("mithril")
 var JsonUtil = require("../../utils/JsonUtil")
 var MiscUtil = require("../../utils/MiscUtil")
 
+var AlarmJobFigure = require("../alarm_job_figure/AlarmJobFigure")
+
 var baseUrl = "http://localhost:5000/api/"
 
 var AlarmJob = {
@@ -47,7 +49,7 @@ var AlarmJob = {
         AlarmJob.actualAlarmJob = {}
         if (!!AlarmJob.list && AlarmJob.list.length > 0) {
             alarmJob = AlarmJob.list.find(e => e.id == id)
-            AlarmJob.actualAlarmJob = !!alarmJob ? alarmJob.attributes : {}
+            AlarmJob.actualAlarmJob = !!alarmJob ? alarmJob : {}
         } else {
             AlarmJob.loading = true
             AlarmJob.actualAlarmJob = {}
@@ -89,10 +91,6 @@ var AlarmJob = {
           headers: {
             "Accept": "application/vnd.api+json",
           }
-        }).then(() => {
-          var pre_num_entries = AlarmJob.list.length
-          AlarmJob.list = AlarmJob.list.filter(e => e.id !== id)
-          AlarmJob.numResults -= (pre_num_entries - AlarmJobFigure.list.length)
         })
       }
 }
