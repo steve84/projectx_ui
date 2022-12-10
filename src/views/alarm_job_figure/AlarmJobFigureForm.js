@@ -83,7 +83,7 @@ var AlarmJobFigureForm =  {
                         type: ["number", "integer"].indexOf(property.type) > -1 ? "number" : "text",
                         value: vnode.state.val.attributes.method_arguments[prop],
                         name: prop,
-                        onchange: e => vnode.state.val.attributes.method_arguments[prop] = e.target.value
+                        onchange: e => vnode.state.val.attributes.method_arguments[prop] = ["number", "integer"].indexOf(property.type) > -1 ? +e.target.value :  e.target.value
                     })
                 ])
             })) : m("span"),
@@ -120,7 +120,7 @@ var AlarmJobFigureForm =  {
                         value: vnode.state.val.attributes.alarm_condition_arguments[prop],
                         min: Object.keys(property).indexOf('minimum') > -1 ? property.minimum : null,
                         name: prop,
-                        onchange: e => vnode.state.val.attributes.alarm_condition_arguments[prop] = e.target.value
+                        onchange: e => vnode.state.val.attributes.alarm_condition_arguments[prop] = ["number", "integer"].indexOf(property.type) > -1 ? +e.target.value :  e.target.value
                     })
                 ])
             })) : m("span"),

@@ -53,7 +53,7 @@ var AlarmJobDetail =  {
             {"name": "Name", "property": "job_name"},
             {"name": "Remarks", "property": "job_remark"},
             {"name": "Last check", "property": "last_check", "fn": row => row["last_check"] ? new Date(row["last_check"]).toLocaleString() : ""},
-            {"name": "Newest figure ts", "property": "key_figure_ts", "fn": row => row["last_check"] ? new Date(row["last_check"]).toLocaleString() : ""},
+            {"name": "Newest figure ts", "property": "key_figure_ts", "fn": row => row["key_figure_ts"] ? new Date(row["key_figure_ts"]).toLocaleString() : ""},
         ]
         AlarmJob.getAlarmJobById(vnode.attrs.key)
         AlarmJobFigure.getAlarmJobFiguresByAlarmId(vnode.attrs.key)
